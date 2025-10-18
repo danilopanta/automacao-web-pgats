@@ -1,7 +1,8 @@
-export function getRandonNumber() {
-    return new Date().getTime();
+//Criando minhas funcoes auxilixares
+import {faker} from '@faker-js/faker'
+export function getRandomNumber(){
+    return faker.number.bigInt()
 }
-
-export function getRandonEmail() {
-    return `panta-${getRandonNumber()}@test.com`
+export function getRandomEmail(){
+    return faker.internet.email({firstName: 'qatester', lastName: `${new Date().getTime()}`})
 }

@@ -1,22 +1,19 @@
 /// <reference types="cypress" />
 /**
  * 
- * 
  * HOOKS / Ganchos
  * before() - 1 vez antes de todos os testes (it)
-* beforeEach() - antes de cada teste (it)
+ * beforeEach() - antes de cada teste (it)
  * after() - 1 vez depois de todos os testes (it)
  * afterEach() - depois de cada teste (it)
- *  */ 
+ *  
+ */
 require('cypress-xpath');
 
 import { faker } from '@faker-js/faker';
 
 import userData from '../fixtures/example.json'
-import { 
-    getRandonNumber,
-    getRandonEmail
- } from '../support/helper'
+import { getRandomEmail } from '../support/helper.js'
 
 // Dados do arquivo de fixtures
 userData.name
@@ -30,16 +27,15 @@ describe('Automation Exercise', () => {
         cy.visit('https://automationexercise.com/')
         // Usando xpath com sintaxe correta
         cy.xpath('//a[@href="/login"]').click()
-            
+
     })
-    it('Cadastro de usuário', () => { 
+    // CT 01
+    it('Cadastro de usuário', () => {
         //Arrange - Preparação / Configuração
-
         const timestamp = new Date().getTime();
-
         //Acessar o site
         cy.xpath('//input[@data-qa="signup-name"]').type(userData.name)
-        cy.xpath('//input[@data-qa="signup-email"]').type(getRandonEmail())
+        cy.xpath('//input[@data-qa="signup-email"]').type(getRandomEmail())
         cy.xpath('//button[@data-qa="signup-button"]').click()
 
         //Informação da conta
@@ -72,65 +68,65 @@ describe('Automation Exercise', () => {
         cy.url().should('include', '/account_created')
         cy.contains('h2', 'Account Created!').should('have.text', 'Account Created!')
     })
+    // CT 02
+    it('Login de usuário com email e senha corretos', () => {
 
-    it('Login de usuário com email e senha corretos', () => { 
-                
         cy.xpath('//input[@data-qa="login-email"]').type('qa-tester-1759530219181@test.com')
         cy.xpath('//input[@data-qa="login-password"]').type('12345')
         cy.xpath('//button[@data-qa="login-button"]').click()
 
-        cy.xpath('//i[@class="fa fa-user"]').parent().should('contain', 'QA Tester') 
+        cy.xpath('//i[@class="fa fa-user"]').parent().should('contain', 'QA Tester')
         cy.xpath('//a[@href="/logout"]').should('be.visible')
         cy.xpath('//b[contains(text(), "QA Tester")]')
 
         cy.get(':nth-child(10) > a')
-        .should('be.visible')
-        .and('have.text', ' Logged in as QA Tester')
+            .should('be.visible')
+            .and('have.text', ' Logged in as QA Tester')
 
         cy.contains('b', 'QA Tester')
         cy.contains('Logged in as QA Tester').should('be.visible')
 
 
     });
+    // CT 03
+    it('Login de usuário com email e senha incorretos', () => {
 
-    it('Login de usuário com email e senha incorretos', () => { 
-         
         cy.xpath('//input[@data-qa="login-email"]').type('qa-tester-1759530219181@test.com')
         cy.xpath('//input[@data-qa="login-password"]').type('senha_incorreta')
         cy.xpath('//button[@data-qa="login-button"]').click()
 
         cy.xpath('//div[@class="login-form"]//form//p').should('contain', 'Your email or password is incorrect!')
-         
-    });
 
-      it('Logout de usuário', () => {  
+    });
+    // CT 04
+    it('Logout de usuário', () => {
 
         cy.xpath('//input[@data-qa="login-email"]').type('qa-tester-1759530219181@test.com')
         cy.xpath('//input[@data-qa="login-password"]').type('12345')
         cy.xpath('//button[@data-qa="login-button"]').click()
 
-        cy.xpath('//i[@class="fa fa-user"]').parent().should('contain', 'QA Tester') 
+        cy.xpath('//i[@class="fa fa-user"]').parent().should('contain', 'QA Tester')
         cy.xpath('//a[@href="/logout"]').should('be.visible').click()
 
-        cy.url().should('contain', '/login') 
+        cy.url().should('contain', '/login')
     });
+    // CT 05
+    it('Cadastro de usuário com email já existente', () => {
 
-    it('Cadastro de usuário com email já existente', () => { 
-         
         cy.xpath('//input[@data-qa="signup-name"]').type('Danilo Panta')
         cy.xpath('//input[@data-qa="signup-email"]').type(`qa-tester-1759530219181@test.com`)
         cy.xpath('//button[@data-qa="signup-button"]').click()
-        cy.xpath('//div[@class="signup-form"]//form//p').should('contain', 'Email Address already exist!')     
+        cy.xpath('//div[@class="signup-form"]//form//p').should('contain', 'Email Address already exist!')
     });
+    // CT 06
+    it('Enviar um formulário de contato com upload de arquivo', () => {
 
-    it('Enviar um formulário de contato com upload de arquivo', () => { 
-
-        cy.xpath('//a[contains(@href, "/contact")]').click()   
+        cy.xpath('//a[contains(@href, "/contact")]').click()
         cy.xpath('//input[@data-qa="name"]').type(userData.name)
         cy.xpath('//input[@data-qa="email"]').type(userData.email)
         cy.xpath('//input[@data-qa="subject"]').type(userData.subject)
         cy.xpath('//textarea[@data-qa="message"]').type('Aqui vai uma mensagem de teste')
-        cy.fixture('example.json').as('arquivo') 
+        cy.fixture('example.json').as('arquivo')
         cy.xpath('//input[@type="file"]').selectFile('@arquivo')
 
         cy.xpath('//input[@data-qa="submit-button"]').click()

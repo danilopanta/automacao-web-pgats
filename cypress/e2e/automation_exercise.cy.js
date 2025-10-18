@@ -1,140 +1,138 @@
 /// <reference types="cypress" />
-/**
- * 
- * 
- * HOOKS / Ganchos
- * before() - 1 vez antes de todos os testes (it)
-* beforeEach() - antes de cada teste (it)
- * after() - 1 vez depois de todos os testes (it)
- * afterEach() - depois de cada teste (it)
- *  */ 
-import { faker } from '@faker-js/faker';
 
 import userData from '../fixtures/example.json'
-import { 
-    getRandonNumber,
-    getRandonEmail
- } from '../support/helper'
+import {
+    getRandomNumber,
+    getRandomEmail
 
+} from '../support/helper'
 
-userData.name
-userData.email
-userData.body
+import { faker } from '@faker-js/faker'
 
 describe('Automation Exercise', () => {
+
     beforeEach(() => {
-        // Código a ser executado antes de cada teste
-        //cy.viewport('iphone-xr')
+        cy.viewport('iphone-xr')
         cy.visit('https://automationexercise.com/')
         cy.get('a[href="/login"]').click()
-            
     })
-    it.only('Cadastro de usuário', () => { 
-        //Arrange - Preparação / Configuração
+    //CT 01
+    it('Exemplos de Logs', () => {
+        cy.log(`getRandomNumber: ${getRandomNumber()}`)
+        cy.log(`getRandomEmail: ${getRandomEmail()}`)
 
-        const timestamp = new Date().getTime();
+        cy.log(`Dog breed: ${faker.animal.dog()}`)
+        cy.log(`Full name: ${faker.person.fullName()}`)
+        cy.log(`Company: ${faker.company.name()}`)
 
-        //Acessar o site
-        cy.get('input[data-qa="signup-name"]').type(userData.name)
-        cy.get('input[data-qa="signup-email"]').type(getRandonEmail())
-        cy.get('button[data-qa="signup-button"]').click()
+        cy.log(`Nome de usuário: ${userData.name}`)
+        cy.log(`Email do usuário: ${userData.email}`)
 
-        //Informação da conta
-        cy.get('input#id_gender1').check()
-        cy.get('input#password').type('Mudar@123')
-        cy.get('select#days').select('20')
-        cy.get('select#months').select(faker.date.month())
-        cy.get('select#years').select('1991')
-
-        //Newsletter e ofertas especiais
-        cy.get('input#newsletter').check()
-        cy.get('input#optin').check()
-
-        //Informação de Endereço
-        cy.get('input#first_name').type(faker.person.firstName())
-        cy.get('input#last_name').type(faker.person.lastName())
-        cy.get('input#company').type(`PGATS ${faker.company.name()}`)
-        cy.get('input#address1').type(faker.location.streetAddress())
-        cy.get('select#country').select('Canada')
-        cy.get('input#state').type(faker.location.state())
-        cy.get('input#city').type(faker.location.city())
-        cy.get('input#zipcode').type(faker.location.zipCode())
-        cy.get('input#mobile_number').type('111 222 333')
-
-        //Act - Ação
-        //Enviar o formulário
-        cy.get('button[data-qa="create-account"]').click()
-
-        //Assert - Verificação / Validação
-        cy.url().should('include', '/account_created')
-        cy.contains('h2', 'Account Created!').should('have.text', 'Account Created!')
     })
+    //CT 02
+    it('Cadastrar um usuário', () => {
 
-    it('Login de usuário com email e senha corretos', () => { 
-                
-        cy.get('input[data-qa="login-email"]').type('qa-tester-1759530219181@test.com')
-        cy.get('input[data-qa="login-password"]').type('12345')
-        cy.get('button[data-qa="login-button"]').click()
+        cy.contains('button', 'Signup').click()
+        cy.get('a[href="/login"]').click()
+        cy.get('[data-qa="signup-name"]').type('Qa Eevee')
+        cy.get('[data-qa="signup-email"]').type(getRandomEmail())
+        cy.contains('button', 'Signup').click()
 
-        cy.get('i.fa-user').parent().should('contain', 'QA Tester') 
-        cy.get('a[href="/logout"]').should('be.visible')
-        cy.contains('b', 'QA Tester')
+        cy.get('input[type=radio]').check("Mrs")
+        cy.get('[data-qa="password"]').type('123456', { log: false })
 
-        cy.get(':nth-child(10) > a')
-        .should('be.visible')
-        .and('have.text', ' Logged in as QA Tester')
+        //Combo boxes
+        cy.get('[data-qa="days"]').select('1')
+        cy.get('[data-qa="months"]').select('January')
+        cy.get('[data-qa="years"]').select('1990')
 
-        cy.contains('b', 'QA Tester')
-        cy.contains('Logged in as QA Tester').should('be.visible')
+        cy.get('input[type=checkbox]#newsletter').check()
+        cy.get('input[type=checkbox]#optin').check()
 
+        cy.get('[data-qa="first_name"]').type(faker.person.firstName())
+        cy.get('[data-qa="last_name"]').type(faker.person.lastName())
+        cy.get('[data-qa="company"]').type(faker.company.name())
+        cy.get('[data-qa="address"]').type(faker.location.streetAddress())
+
+        cy.get('[data-qa="country"]').select('Canada')
+        cy.get('[data-qa="state"]').type(faker.location.state())
+        cy.get('[data-qa="city"]').type(faker.location.city())
+        cy.get('[data-qa="zipcode"]').type(faker.location.zipCode())
+        cy.get('[data-qa="mobile_number"]').type('9999999999')
+
+        //Act
+        cy.get('[data-qa="create-account"]').click()
+
+        //Assert
+        cy.url().should('includes', 'account_created')
+        cy.contains('b', 'Account Created!')
+        cy.get('[data-qa="continue-button"]').click()
 
     });
+    //CT 03
+    it('Login de usuário com e-mail e senha corretos', () => {
 
-    it('Login de usuário com email e senha incorretos', () => { 
-         
-        cy.get('input[data-qa="login-email"]').type('qa-tester-1759530219181@test.com')
-        cy.get('input[data-qa="login-password"]').type('senha_incorreta')
-        cy.get('button[data-qa="login-button"]').click()
+        cy.get('a[href="/login"]').click()
 
+        cy.get('[data-qa="login-email"]').type('eevee-1759530412987@teste.com')
+        cy.get('[data-qa="login-password"]').type('123456', { log: false })
+        cy.get('[data-qa="login-button"]').click()
+        cy.contains('b', 'Qa Eevee')
+        cy.get(':nth-child(9) > a')
+
+    });
+    //CT 04
+    it('Login de usuário com e-mail e senha incorretos', () => {
+
+        cy.get('a[href="/login"]').click()
+
+        cy.get('[data-qa="login-email"]').type('eevee-1759530412987@teste.com')
+        cy.get('[data-qa="login-password"]').type('120456', { log: false })
+        cy.get('[data-qa="login-button"]').click()
         cy.get('.login-form > form > p').should('contain', 'Your email or password is incorrect!')
-         
     });
+    //CT 05
+    it('Logout de usuário com e-mail e senha corretos', () => {
+        //  cy.visit('https://automationexercise.com/')
 
-      it('Logout de usuário', () => {  
+        cy.get('a[href="/login"]').click()
 
-        cy.get('input[data-qa="login-email"]').type('qa-tester-1759530219181@test.com')
-        cy.get('input[data-qa="login-password"]').type('12345')
-        cy.get('button[data-qa="login-button"]').click()
 
-        cy.get('i.fa-user').parent().should('contain', 'QA Tester') 
-        cy.get('a[href="/logout"]').should('be.visible').click()
+        cy.get('[data-qa="login-email"]').type('eevee-1759530412987@teste.com')
+        cy.get('[data-qa="login-password"]').type('123456', { log: false })
+        cy.get('[data-qa="login-button"]').click()
+        // cy.contains('b', 'Qa Eevee')
+        cy.get(':nth-child(9) > a')
+        cy.get('.shop-menu > .nav > :nth-child(4) > a').click()
+        cy.get('.login-form > h2').should('contain', 'Login to your account')
 
-        cy.url().should('contain', '/login') 
-    });
+    })
+    //CT 06
+    it('Cadastrar usuário com e-mail e senha existente', () => {
+        //  cy.visit('https://automationexercise.com/');        
+        cy.get('a[href="/login"]').click()
+        cy.get('[data-qa="signup-name"]').type('Qa Eevee')
+        cy.get('[data-qa="signup-email"]').type('eevee-1759530412987@teste.com')
+        cy.contains('button', 'Signup').click()
+        cy.get('.signup-form > form > p').should('contain', 'Email Address already exist!')
+        //cy.get('b').should('contain', 'Email Address already exist!')   
+    })
+    //CT 07
+    it('Enviar um formulario de contato', () => {
 
-    it('Cadastro de usuário com email já existente', () => { 
-         
-        cy.get('input[data-qa="signup-name"]').type('Danilo Panta')
-        cy.get('input[data-qa="signup-email"]').type(`qa-tester-1759530219181@test.com`)
-        cy.get('button[data-qa="signup-button"]').click()
-        cy.get('.signup-form > form > p').should('contain', 'Email Address already exist!')     
-    });
-
-    it('Enviar um formulário de contato com upload de arquivo', () => { 
-
-        cy.get(`a[href*="/contact"]`).click()   
-        cy.get('input[data-qa="name"]').type(userData.name)
-        cy.get('input[data-qa="email"]').type(userData.email)
+        cy.get(':nth-child(8) > a').click()
+        cy.get('[data-qa="name"]').type(userData.name)
+        cy.get('[data-qa="email"]').type('eevee-1759530412987@teste.com')
         cy.get('[data-qa="subject"]').type(userData.subject)
-        cy.get('textarea[data-qa="message"]').type('Aqui vai uma mensagem de teste')
-        cy.fixture('example.json').as('arquivo') 
-        cy.get('input[type="file"]').selectFile('@arquivo')
+        cy.get('[data-qa="message"]').type(userData.message)
+
+        cy.fixture('example.json').as('file')
+        cy.get('input[type=file]').selectFile('@file')
 
         cy.get('[data-qa="submit-button"]').click()
-
-        //Assert - Verificação / Validação
         cy.get('.status').should('be.visible')
         cy.get('.status').should('have.text', 'Success! Your details have been submitted successfully.')
-    });
 
-});
+    })
+
+})
