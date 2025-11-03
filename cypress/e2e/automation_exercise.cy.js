@@ -1,138 +1,171 @@
 /// <reference types="cypress" />
 
-import userData from '../fixtures/example.json'
+import userData from '../fixtures/userData.json'
 import {
-    getRandomNumber,
-    getRandomEmail
-
+    generateUser,
+    generateProductSearch,
+    generatePaymentData,
+    getExistingUser,
+    getInvalidUser
 } from '../support/helper'
 
-import { faker } from '@faker-js/faker'
+// Importar todos os módulos
+import menu from '../../modules/menu'
+import login from '../../modules/login'
+import cadastro from '../../modules/cadastro'
+import contato from '../../modules/contato'
+import produtos from '../../modules/produtos'
+import carrinho from '../../modules/carrinho'
+import home from '../../modules/home'
 
-describe('Automation Exercise', () => {
+describe('Automation Exercise - PGATS', () => {
 
     beforeEach(() => {
-        cy.viewport('iphone-xr')
         cy.visit('https://automationexercise.com/')
-        cy.get('a[href="/login"]').click()
-    })
-    //CT 01
-    it('Exemplos de Logs', () => {
-        cy.log(`getRandomNumber: ${getRandomNumber()}`)
-        cy.log(`getRandomEmail: ${getRandomEmail()}`)
-
-        cy.log(`Dog breed: ${faker.animal.dog()}`)
-        cy.log(`Full name: ${faker.person.fullName()}`)
-        cy.log(`Company: ${faker.company.name()}`)
-
-        cy.log(`Nome de usuário: ${userData.name}`)
-        cy.log(`Email do usuário: ${userData.email}`)
-
-    })
-    //CT 02
-    it('Cadastrar um usuário', () => {
-
-        cy.contains('button', 'Signup').click()
-        cy.get('a[href="/login"]').click()
-        cy.get('[data-qa="signup-name"]').type('Qa Eevee')
-        cy.get('[data-qa="signup-email"]').type(getRandomEmail())
-        cy.contains('button', 'Signup').click()
-
-        cy.get('input[type=radio]').check("Mrs")
-        cy.get('[data-qa="password"]').type('123456', { log: false })
-
-        //Combo boxes
-        cy.get('[data-qa="days"]').select('1')
-        cy.get('[data-qa="months"]').select('January')
-        cy.get('[data-qa="years"]').select('1990')
-
-        cy.get('input[type=checkbox]#newsletter').check()
-        cy.get('input[type=checkbox]#optin').check()
-
-        cy.get('[data-qa="first_name"]').type(faker.person.firstName())
-        cy.get('[data-qa="last_name"]').type(faker.person.lastName())
-        cy.get('[data-qa="company"]').type(faker.company.name())
-        cy.get('[data-qa="address"]').type(faker.location.streetAddress())
-
-        cy.get('[data-qa="country"]').select('Canada')
-        cy.get('[data-qa="state"]').type(faker.location.state())
-        cy.get('[data-qa="city"]').type(faker.location.city())
-        cy.get('[data-qa="zipcode"]').type(faker.location.zipCode())
-        cy.get('[data-qa="mobile_number"]').type('9999999999')
-
-        //Act
-        cy.get('[data-qa="create-account"]').click()
-
-        //Assert
-        cy.url().should('includes', 'account_created')
-        cy.contains('b', 'Account Created!')
-        cy.get('[data-qa="continue-button"]').click()
-
-    });
-    //CT 03
-    it('Login de usuário com e-mail e senha corretos', () => {
-
-        cy.get('a[href="/login"]').click()
-
-        cy.get('[data-qa="login-email"]').type('eevee-1759530412987@teste.com')
-        cy.get('[data-qa="login-password"]').type('123456', { log: false })
-        cy.get('[data-qa="login-button"]').click()
-        cy.contains('b', 'Qa Eevee')
-        cy.get(':nth-child(9) > a')
-
-    });
-    //CT 04
-    it('Login de usuário com e-mail e senha incorretos', () => {
-
-        cy.get('a[href="/login"]').click()
-
-        cy.get('[data-qa="login-email"]').type('eevee-1759530412987@teste.com')
-        cy.get('[data-qa="login-password"]').type('120456', { log: false })
-        cy.get('[data-qa="login-button"]').click()
-        cy.get('.login-form > form > p').should('contain', 'Your email or password is incorrect!')
-    });
-    //CT 05
-    it('Logout de usuário com e-mail e senha corretos', () => {
-        //  cy.visit('https://automationexercise.com/')
-
-        cy.get('a[href="/login"]').click()
-
-
-        cy.get('[data-qa="login-email"]').type('eevee-1759530412987@teste.com')
-        cy.get('[data-qa="login-password"]').type('123456', { log: false })
-        cy.get('[data-qa="login-button"]').click()
-        // cy.contains('b', 'Qa Eevee')
-        cy.get(':nth-child(9) > a')
-        cy.get('.shop-menu > .nav > :nth-child(4) > a').click()
-        cy.get('.login-form > h2').should('contain', 'Login to your account')
-
-    })
-    //CT 06
-    it('Cadastrar usuário com e-mail e senha existente', () => {
-        //  cy.visit('https://automationexercise.com/');        
-        cy.get('a[href="/login"]').click()
-        cy.get('[data-qa="signup-name"]').type('Qa Eevee')
-        cy.get('[data-qa="signup-email"]').type('eevee-1759530412987@teste.com')
-        cy.contains('button', 'Signup').click()
-        cy.get('.signup-form > form > p').should('contain', 'Email Address already exist!')
-        //cy.get('b').should('contain', 'Email Address already exist!')   
-    })
-    //CT 07
-    it('Enviar um formulario de contato', () => {
-
-        cy.get(':nth-child(8) > a').click()
-        cy.get('[data-qa="name"]').type(userData.name)
-        cy.get('[data-qa="email"]').type('eevee-1759530412987@teste.com')
-        cy.get('[data-qa="subject"]').type(userData.subject)
-        cy.get('[data-qa="message"]').type(userData.message)
-
-        cy.fixture('example.json').as('file')
-        cy.get('input[type=file]').selectFile('@file')
-
-        cy.get('[data-qa="submit-button"]').click()
-        cy.get('.status').should('be.visible')
-        cy.get('.status').should('have.text', 'Success! Your details have been submitted successfully.')
-
     })
 
+    it('CT01 - Registrar usuário com sucesso', () => {
+        const testUser = generateUser()
+
+        menu.navegarParaLogin()
+        login.verificarPaginaDeLogin()
+        login.preencherFormularioDeNovoUsuario(testUser.name, testUser.email)
+
+        cadastro.verificarPaginaCadastro()
+        cadastro.preencherCadastroCompleto(testUser)
+        cadastro.submeterCadastro()
+
+        cadastro.verificarContaCriada()
+        cadastro.continuarAposCriarConta()
+        menu.verificarQueUsuarioEstaLogado(testUser.name)
+
+        // Cleanup
+        menu.deletarMinhaConta()
+        cadastro.verificarQueContaFoiDeletada()
+    })
+
+    it('CT02 - Login de usuário com email e senha correta', () => {
+        const existingUser = getExistingUser()
+
+        menu.navegarParaLogin()
+        login.verificarPaginaDeLogin()
+        login.fazerLogin(existingUser.email, existingUser.password)
+
+
+        login.verificarQueLoginFoiRealizado()
+        menu.verificarQueUsuarioEstaLogado(existingUser.name)
+    })
+
+    it('CT03 - Login User with incorrect email and password', () => {
+        const invalidUser = getInvalidUser()
+
+        menu.navegarParaLogin()
+        login.verificarPaginaDeLogin()
+        login.fazerLogin(invalidUser.email, invalidUser.password)
+
+        login.verificarErroLogin('Your email or password is incorrect!')
+    })
+
+    it('CT04 - Logout de usuário', () => {
+        const existingUser = getExistingUser()
+
+        menu.navegarParaLogin()
+        login.fazerLogin(existingUser.email, existingUser.password)
+        menu.verificarQueUsuarioEstaLogado(existingUser.name)
+
+        menu.fazerLogout()
+        login.verificarPaginaDeLogin()
+    })
+
+    it('CT05 - Criar conta com e-mail que já existe', () => {
+        const existingUser = getExistingUser()
+
+        menu.navegarParaLogin()
+        login.verificarPaginaDeLogin()
+        login.preencherFormularioDeNovoUsuario('Test User', existingUser.email)
+
+        login.verificarErroSignup('Email Address already exist!')
+    })
+
+    it('CT06 - Preencher formulário de contato', () => {
+        menu.navegarParaContato()
+        contato.verificarPaginaContato()
+
+        contato.preencherFormularioCompleto(userData.contact, 'userData.json')
+        contato.enviarFormulario()
+
+        contato.verificarMensagemSucesso()
+        contato.voltarParaHome()
+        home.verificarPaginaHome()
+    })
+
+    it('CT08 - Validar detalhes da página de produto', () => {
+        menu.navegarParaProdutos()
+        produtos.verificarPaginaProdutos()
+        produtos.verificarListaProdutos()
+
+        produtos.visualizarPrimeiroProduto()
+        produtos.verificarPaginaDetalhes()
+        produtos.verificarInformacoesProduto()
+    })
+
+    it('CT09 - Realizar busca de produto', () => {
+        const searchData = generateProductSearch()
+
+        menu.navegarParaProdutos()
+        produtos.verificarPaginaProdutos()
+
+        produtos.buscarProduto(searchData.searchTerm)
+        produtos.verificarResultadoBusca(searchData.searchTerm)
+    })
+
+    it('CT10 - Verificar Subscription no footer', () => {
+        home.verificarPaginaHome()
+        home.rolarParaOFinal()
+        home.verificarSecaoSubscription()
+
+        home.fazerSubscription()
+        home.verificarSubscriptionSucesso()
+    })
+
+    it('CT15 - Realizar a compra de um produto', () => {
+        const testUser = generateUser()
+        const paymentData = generatePaymentData()
+
+        // Registrar usuário com dados dinâmicos
+        menu.navegarParaLogin()
+        login.preencherFormularioDeNovoUsuario(testUser.name, testUser.email)
+        cadastro.preencherCadastroCompleto(testUser)
+        cadastro.submeterCadastro()
+
+        cadastro.continuarAposCriarConta()
+
+        // Adicionar produto ao carrinho
+        menu.navegarParaProdutos()
+        produtos.adicionarPrimeiroProdutoAoCarrinho()
+        produtos.continuarComprando()
+
+        // Processo de checkout
+        menu.navegarParaCarrinho()
+        carrinho.verificarPaginaCarrinho()
+        carrinho.irParaCheckout()
+
+        carrinho.verificarPaginaCheckout()
+        carrinho.verificarEnderecosCheckout(testUser)
+        carrinho.adicionarComentario(paymentData.comment)
+        carrinho.finalizarPedido()
+
+        // Pagamento com dados dinâmicos
+        carrinho.verificarPaginaPagamento()
+        carrinho.pagarComCartao(paymentData)
+
+        carrinho.verificarPedidoConfirmado()
+        carrinho.verificarMensagemSucesso()
+        carrinho.baixarFatura()
+
+        // Cleanup
+        carrinho.continuarAposPagamento()
+        menu.deletarMinhaConta()
+        cadastro.verificarQueContaFoiDeletada()
+    })
 })
